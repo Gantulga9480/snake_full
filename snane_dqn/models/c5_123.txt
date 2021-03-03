@@ -1,0 +1,8 @@
+HOUR 1
+test reward: 0
+test score: 0
+--------------------------
+HOUR 2
+test reward: 0
+test score: 0
+--------------------------

@@ -1,0 +1,40 @@
+HOUR 1
+test reward: -20
+test score: 1
+--------------------------
+HOUR 2
+test reward: 60
+test score: 3
+--------------------------
+HOUR 3
+test reward: 100
+test score: 4
+--------------------------
+HOUR 4
+test reward: 20
+test score: 2
+--------------------------
+HOUR 5
+test reward: 20
+test score: 2
+--------------------------
+HOUR 6
+test reward: 60
+test score: 3
+--------------------------
+HOUR 7
+test reward: 140
+test score: 5
+--------------------------
+HOUR 8
+test reward: 20
+test score: 2
+--------------------------
+HOUR 9
+test reward: 60
+test score: 3
+--------------------------
+HOUR 10
+test reward: 20
+test score: 2
+--------------------------

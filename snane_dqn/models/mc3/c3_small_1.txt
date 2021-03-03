@@ -1,0 +1,49 @@
+LEARNING_RATE = 0.001
+DISCOUNT_RATE = 0.9
+EPSILON = 1
+EPSILON_DECAY = .99999
+MIN_EPSILON = 0.01
+BATCH_SIZE = 512
+EPOCH = 8
+TARGET_NET_UPDATE_FREQUENCY = 5
+UPDATE_COUNTER = 1
+MAX_SCORE = 5
+FOOD_REWARD = 40
+OUT_REWARD = -60
+EMPTY_STEP_REWARD = -4
+WINDOW_SIZE = 5
+HEAD = 66
+TAIL = 33
+FOOD = 99
+EMPTY = 0
+VELOCITY = 50
+
+NETWORK:
+1: 26 input
+2: 512 hidden
+3: 4 output
+
+HOUR 1
+test reward: 56
+test score: 8
+--------------------------
+HOUR 2
+test reward: 60
+test score: 6
+--------------------------
+HOUR 3
+test reward: 104
+test score: 11
+--------------------------
+HOUR 4
+test reward: 156
+test score: 14
+--------------------------
+HOUR 5
+test reward: 48
+test score: 6
+--------------------------
+HOUR 6
+test reward: -36
+test score: 2
+--------------------------
