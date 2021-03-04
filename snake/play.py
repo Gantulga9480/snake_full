@@ -1,7 +1,7 @@
 from snake import Snake
 
-game = Snake(test=True)
+game = Snake()
 while game.run:
-    state = game.reset()
+    game.reset()
     while not game.over:
         game.step()

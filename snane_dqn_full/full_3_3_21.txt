@@ -1,5 +1,14 @@
+lr: 0.001
+gamma: 0.5
+batch size: 256
+buffer size 5000
+Network:
+:  100
+:  200
+:  4
+--------------------------
 HOUR 1
-test reward: 0
+test reward: -60
 test score: 0
 --------------------------
 HOUR 2

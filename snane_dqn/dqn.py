@@ -18,9 +18,9 @@ args = parser.parse_args()
 
 # Hyperparameters
 LEARNING_RATE = 0.001
-DISCOUNT_RATE = 0.999
+DISCOUNT_RATE = 0.9
 EPSILON = 1
-EPSILON_DECAY = .9999
+EPSILON_DECAY = .99999
 MIN_EPSILON = 0.01
 BATCH_SIZE = 256
 EPOCH = 10
@@ -37,7 +37,7 @@ INPUT_SHAPE = WINDOW_SIZE * WINDOW_SIZE + 2
 HIDDEN_LAYER_1 = 25
 HIDDEN_LAYER_2 = 8
 OUT_SHAPE = len(ACTION_SPACE)
-NETWORK = [INPUT_SHAPE, HIDDEN_LAYER_1, HIDDEN_LAYER_2, OUT_SHAPE]
+NETWORK = [INPUT_SHAPE, HIDDEN_LAYER_1, OUT_SHAPE]
 
 # Mixed precision : RTX GPU only
 # policy = mixed_precision.Policy('mixed_float16')
@@ -49,7 +49,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 game = Snake()
 show_every = 5
 episode = 1
-history = {'ep': [], 'reward': [], 'test_score': [], 'test_reward': []}
+history = {'ep': [], 'reward': []}
 ep_rewards = []
 reward_tmp = 0
 hour = 1
@@ -78,8 +78,6 @@ def model_test(loop=False):
                     break
             action_counter += 1
         if not loop:
-            history['test_reward'].append(test_reward)
-            history['test_score'].append(test_score)
             print('test reward:', test_reward)
             print('test score:', test_score)
             print('------------------------')
@@ -92,7 +90,7 @@ def get_model():
     model = Sequential()
     model.add(Input(shape=(INPUT_SHAPE,), name='input'))
     model.add(Dense(HIDDEN_LAYER_1, activation='relu'))
-    model.add(Dense(HIDDEN_LAYER_2, activation='relu'))
+    # model.add(Dense(HIDDEN_LAYER_2, activation='relu'))
     model.add(Dense(len(ACTION_SPACE)))
     # model.add(Activation('relu', dtype='float32'))  # TC enabled GPU only
     model.compile(loss="mse", optimizer=Adam(lr=LEARNING_RATE),
@@ -153,8 +151,7 @@ while game.run:
             action_values = main_nn.predict(np.expand_dims(state, axis=0))[0]
             action = np.argmax(action_values)
         terminal, new_state, r = game.step(action=action)
-        for _ in range(game.score + 1):
-            REPLAY_BUFFER.append([state, action, new_state, r, terminal])
+        REPLAY_BUFFER.append([state, action, new_state, r, terminal])
         EPSILON = EPSILON * EPSILON_DECAY
         ep_reward += r
         state = new_state
@@ -216,16 +213,13 @@ with open(f'{args.index}.txt', 'w+') as f:
     f.write(f'lr: {LEARNING_RATE}\n')
     f.write(f'gamma: {DISCOUNT_RATE}\n')
     f.write(f'batch size: {BATCH_SIZE}\n')
-    f.write(f'buffer size {BUFFER_SIZE}\n')
+    f.write(f'buffer size: {BUFFER_SIZE}\n')
+    f.write(f'food reward: {FOOD_REWARD}\n')
+    f.write(f'out reward: {OUT_REWARD}\n')
+    f.write(f'state: {TAIL}, {HEAD}, {FOOD}\n')
     f.write(f'Network:\n')
     for item in NETWORK:
         f.write(f':  {item}\n')
-    f.write('--------------------------\n')
-    for i, item in enumerate(history['test_reward']):
-        f.write(f'HOUR {i+1}\n')
-        f.write(f'test reward: {item}\n')
-        f.write(f"test score: {history['test_score'][i]}\n")
-        f.write('--------------------------\n')
 plt.plot(history['reward'])
 plt.plot(history['ep'])
 plt.ylim([-100, 1000])

@@ -11,7 +11,8 @@ tk_root.withdraw()
 dir_name = filedialog.askopenfilename()
 main_nn = load_model(dir_name)
 game = Snake(test=True)
-while game.run:
+scores = []
+for _ in range(100):
     state = game.reset()
     counter = 0
     while not game.over:
@@ -20,9 +21,12 @@ while game.run:
         _, new_state, r = game.step(action=action)
         state = new_state
         counter += 1
-        if counter > game.board_count * game.board_count:
+        if counter > game.board_count * game.board_count * 10:
             game.over = True
         if r == FOOD_REWARD:
             counter = 0
-    print(game.snake[0][2])
-    # time.sleep(5)
+    scores.append(len(game.snake) - 3)
+    print(len(game.snake) - 3, game.snake[0][2])
+    game.caption(f'{len(scores)} : {sum(scores)/len(scores)}')
+    time.sleep(3)
+print(sum(scores)/len(scores))

@@ -70,53 +70,42 @@ class Snake:
     def get_window(self):
         x = self.snake[0][0]
         y = self.snake[0][1]
-        state = 0
         dis_x = self.food_x - x
         dis_y = self.food_y - y
         state = [dis_x, dis_y]
-        """
-        if dis_x < 0 and dis_y < 0:
-            state = 0
-        elif dis_x < 0 and dis_y == 0:
-            state = 1
-        elif dis_x < 0 and dis_y > 0:
-            state = 2
-        elif dis_x == 0 and dis_y > 0:
-            state = 3
-        elif dis_x > 0 and dis_y > 0:
-            state = 4
-        elif dis_x > 0 and dis_y == 0:
-            state = 5
-        elif dis_x > 0 and dis_y < 0:
-            state = 6
-        elif dis_x == 0 and dis_y < 0:
-            state = 7
-        elif dis_x == 0 and dis_y == 0:
-            print('wrong state')
-            quit()
-        """
         win_x = self.snake[0][0]
         win_y = self.snake[0][1]
         end_x = win_x + WINDOW_SIZE
         end_y = win_y + WINDOW_SIZE
         board = np.pad(self.board, WINDOW_SIZE//2)
         board = board[win_x:end_x, win_y:end_y]
-        # board = np.delete(board, [WINDOW_SIZE//2, WINDOW_SIZE//2])
         board = board.flatten()
         state = np.array(state)
         states = np.concatenate((state, board), axis=0)
-        # assert states.shape[0] == WINDOW_SIZE * WINDOW_SIZE - 1 + 1
         return states
 
     def get_action_dir(self, action):
         if action == 0:
-            self.snake[0][2] = "↑"
+            if self.snake[0][2] == "↑":
+                self.snake[0][2] = "←"
+            elif self.snake[0][2] == "→":
+                self.snake[0][2] = "↑"
+            elif self.snake[0][2] == "↓":
+                self.snake[0][2] = "→"
+            elif self.snake[0][2] == "←":
+                self.snake[0][2] = "↓"
         elif action == 1:
-            self.snake[0][2] = "→"
+            pass
+
         elif action == 2:
-            self.snake[0][2] = "↓"
-        elif action == 3:
-            self.snake[0][2] = "←"
+            if self.snake[0][2] == "↑":
+                self.snake[0][2] = "→"
+            elif self.snake[0][2] == "→":
+                self.snake[0][2] = "↓"
+            elif self.snake[0][2] == "↓":
+                self.snake[0][2] = "←"
+            elif self.snake[0][2] == "←":
+                self.snake[0][2] = "↑"
 
     def get_possible_actions(self):
         if self.snake[0][2] == "↑":

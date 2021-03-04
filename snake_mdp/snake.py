@@ -38,7 +38,6 @@ class Snake:
         self.over = False
         self.food_hit = False
         self.win_state = {}
-        self.win_state_counter = 0
 
         self.v = st.ValueFunction(update_rate=self.update_rate)
 

@@ -20,14 +20,14 @@ FPS = 60
 # FOOD = 99
 
 EMPTY = 0
-TAIL = 1
-HEAD = 2
+TAIL = -1
+HEAD = 1
 FOOD = 3
 
-# 0: forward, 1: left, 2: right, 3: down
-ACTION_SPACE = [0, 1, 2, 3]
-FOOD_REWARD = 40
-OUT_REWARD = -60
+# 0: left, 1: forward, 2: right
+ACTION_SPACE = [0, 1, 2]
+FOOD_REWARD = 5
+OUT_REWARD = -5
 EMPTY_STEP_REWARD = 0
 
 WINDOW_SIZE = 7
