@@ -49,7 +49,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 game = Snake()
 show_every = 5
 episode = 1
-history = {'ep': [], 'reward': [], 'test_score': [], 'test_reward': []}
+history = {'ep': [], 'reward': []}
 ep_rewards = []
 reward_tmp = 0
 hour = 1
@@ -78,8 +78,6 @@ def model_test(loop=False):
                     break
             action_counter += 1
         if not loop:
-            history['test_reward'].append(test_reward)
-            history['test_score'].append(test_score)
             print('test reward:', test_reward)
             print('test score:', test_score)
             print('------------------------')
@@ -175,6 +173,13 @@ while game.run:
         if r == FOOD_REWARD:
             score += 1
 
+        if game.save:
+            time_now = dt.now()
+            dtime = str(time_now - start_time).split(':')
+            info = f"{args.index}_sc{MAX_SCORE}_ep{episode}_t{dtime[0]}.h5"
+            main_nn.save(info)
+            game.save = False
+
     ep_rewards.append(ep_reward)
     episode += 1
 
@@ -217,13 +222,7 @@ with open(f'{args.index}.txt', 'w+') as f:
     f.write(f'Network:\n')
     for item in NETWORK:
         f.write(f':  {item}\n')
-    f.write('--------------------------\n')
-    for i, item in enumerate(history['test_reward']):
-        f.write(f'HOUR {i+1}\n')
-        f.write(f'test reward: {item}\n')
-        f.write(f"test score: {history['test_score'][i]}\n")
-        f.write('--------------------------\n')
 plt.plot(history['reward'])
 plt.plot(history['ep'])
-plt.ylim([-100, 500])
+plt.ylim([OUT_REWARD*1.2, FOOD_REWARD*50])
 plt.show()

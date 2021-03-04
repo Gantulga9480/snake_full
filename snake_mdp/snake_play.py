@@ -19,5 +19,5 @@ for episode in range(100):
         action = game.v.getAction(state)
         _, state, _ = game.step(action=action)
     scores.append(len(game.snake) - 3)
-    game.caption(f'{len(scores)} : {sum(scores)/len(scores)}')
+    # game.caption(f'{len(scores)} : {sum(scores)/len(scores)}')
 print(sum(scores)/len(scores))

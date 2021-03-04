@@ -1,6 +1,5 @@
 import pygame
 import numpy as np
-import math as mt
 from utils import *
 
 
@@ -68,20 +67,35 @@ class Snake:
         return EMPTY_STEP_REWARD
 
     def get_window(self):
-        x = self.snake[0][0]
-        y = self.snake[0][1]
-        dis_x = self.food_x - x
-        dis_y = self.food_y - y
-        state = [dis_x, dis_y]
-        win_x = self.snake[0][0]
-        win_y = self.snake[0][1]
+        if self.snake[0][2] == "↑":
+            f_x = self.food_x
+            f_y = self.food_y
+            h_x = self.snake[0][0]
+            h_y = self.snake[0][1]
+            t_board = self.board.copy()
+        elif self.snake[0][2] == "→":
+            t_board = np.rot90(self.board)
+            f_x, f_y, h_x, h_y = self.rotate_food(1)
+        elif self.snake[0][2] == "↓":
+            t_board = np.rot90(self.board, 2)
+            f_x, f_y, h_x, h_y = self.rotate_food(2)
+        elif self.snake[0][2] == "←":
+            t_board = np.rot90(self.board, 3)
+            f_x, f_y, h_x, h_y = self.rotate_food(3)
+        # print(t_board)
+        # print(f_x, f_y)
+        # print(h_x, h_y)
+        win_x = h_x
+        win_y = h_y
         end_x = win_x + WINDOW_SIZE
         end_y = win_y + WINDOW_SIZE
-        board = np.pad(self.board, WINDOW_SIZE//2)
+        board = np.pad(t_board, WINDOW_SIZE//2)
         board = board[win_x:end_x, win_y:end_y]
+        # print(board)
         board = board.flatten()
-        state = np.array(state)
+        state = np.array([f_x - h_x, f_y - h_y])
         states = np.concatenate((state, board), axis=0)
+        assert states.shape[0] == 51
         return states
 
     def get_action_dir(self, action):
@@ -214,41 +228,31 @@ class Snake:
 
     def draw_game(self, board):
         self.win.fill((0, 0, 0))
-        pygame.draw.line(self.win, WHITE,
-                         (20, 20),
-                         (20, 520))
+        pygame.draw.line(self.win, WHITE, (20, 20), (20, 520))
         pygame.draw.line(self.win, WHITE,
                          (20 + self.board_count * self.vel, 20),
                          (20 + self.board_count * self.vel, 520))
-        pygame.draw.line(self.win, WHITE,
-                         (20, 20),
-                         (520, 20))
+        pygame.draw.line(self.win, WHITE, (20, 20), (520, 20))
         pygame.draw.line(self.win, WHITE,
                          (20, 20 + self.board_count * self.vel),
                          (520, 20 + self.board_count * self.vel))
         score_str = self.font.render(f"Score: {self.score}", 1, WHITE)
         self.win.blit(score_str, (240, 540))
-        food_drawn = False
-        for i in range(self.board_count):
-            for j in range(self.board_count):
-                if board[i][j] == HEAD:
-                    pygame.draw.rect(self.win, YELLOW,
-                                     (self.vel*j+21, self.vel*i+21,
-                                      self.shape, self.shape))
-                elif board[i][j] == TAIL:
-                    pygame.draw.rect(self.win, RED,
-                                     (self.vel*j+21, self.vel*i+21,
-                                      self.shape, self.shape))
-                elif board[i][j] == FOOD:
-                    food_drawn = True
-                    pygame.draw.rect(self.win, GREEN,
-                                     (self.vel*j+21, self.vel*i+21,
-                                      self.shape, self.shape))
+        for i, item in enumerate(self.snake):
+            if i == 0:
+                pygame.draw.rect(self.win, YELLOW,
+                                 (self.vel*item[1]+21, self.vel*item[0]+21,
+                                  self.shape, self.shape))
+            else:
+                pygame.draw.rect(self.win, RED,
+                                 (self.vel*item[1]+21, self.vel*item[0]+21,
+                                  self.shape, self.shape))
+        pygame.draw.rect(self.win, GREEN,
+                         (self.vel*self.food_y+21, self.vel*self.food_x+21,
+                          self.shape, self.shape))
         self.draw_win()
         pygame.display.flip()
         self.clock.tick(self.fps)
-        if not food_drawn:
-            print('[WARNING FOOD NOT FOUND]', self.food_hit)
 
     def draw_win(self):
         win_x = self.snake[0][0] - WINDOW_SIZE//2
@@ -331,6 +335,22 @@ class Snake:
             self.score += 1
             self.add_tail()
             self.create_food()
+
+    def rotate_food(self, count):
+        f_x = self.food_x
+        f_y = self.food_y
+        h_x = self.snake[0][0]
+        h_y = self.snake[0][1]
+        for _ in range(count):
+            ft_y = f_x
+            ht_y = h_x
+            ft_x = self.board_count - 1 - f_y
+            ht_x = self.board_count - 1 - h_y
+            f_x = ft_x
+            f_y = ft_y
+            h_x = ht_x
+            h_y = ht_y
+        return f_x, f_y, h_x, h_y
 
     @staticmethod
     def caption(msg):

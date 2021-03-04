@@ -37,6 +37,7 @@ class Snake:
         self.out = False
         self.over = False
         self.food_hit = False
+        self.save = False
 
     def step(self, action=None):
         if self.game_flip:
@@ -294,6 +295,8 @@ class Snake:
                     self.fps += 1
                 elif event.key == pygame.K_DOWN:
                     self.fps -= 1
+                elif event.key == pygame.K_s:
+                    self.save = True
 
     def create_food(self):
         while True:

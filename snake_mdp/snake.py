@@ -43,6 +43,7 @@ class Snake:
 
     def step(self, action=None):
         # self.check_snake()
+        self.caption(f'{self.update_rate}')
         if self.game_flip:
             self.draw_game(self.board)
         self.handle_event()

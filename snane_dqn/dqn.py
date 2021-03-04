@@ -40,11 +40,11 @@ OUT_SHAPE = len(ACTION_SPACE)
 NETWORK = [INPUT_SHAPE, HIDDEN_LAYER_1, OUT_SHAPE]
 
 # Mixed precision : RTX GPU only
-# policy = mixed_precision.Policy('mixed_float16')
-# mixed_precision.set_global_policy(policy)
+policy = mixed_precision.Policy('mixed_float16')
+mixed_precision.set_global_policy(policy)
 
 # CPU only
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 game = Snake()
 show_every = 5
@@ -145,8 +145,7 @@ while game.run:
     score = 0
     while not game.over:
         if np.random.random() < EPSILON:
-            p_actions, _ = game.get_possible_actions()
-            action = p_actions[np.random.randint(3)]
+            action = np.random.randint(3)
         else:
             action_values = main_nn.predict(np.expand_dims(state, axis=0))[0]
             action = np.argmax(action_values)
@@ -222,5 +221,5 @@ with open(f'{args.index}.txt', 'w+') as f:
         f.write(f':  {item}\n')
 plt.plot(history['reward'])
 plt.plot(history['ep'])
-plt.ylim([-100, 1000])
+plt.ylim([OUT_REWARD*1.3, FOOD*50])
 plt.show()
