@@ -1,4 +1,4 @@
 hard code: 40.82
-MDP: 49.12
+MDP: 49.12 (20)
 q-table: 54.15
-DQN: 27.29
+DQN: 30.82

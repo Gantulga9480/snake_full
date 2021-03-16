@@ -202,7 +202,7 @@ class Brain:
                     next_move = "↑"
             else:
                 if head_dir == "→":
-                    if board[hi_x][hi_y+1] == TAIL:
+                    if hi_y == BOARD_COUNT - 1 or board[hi_x][hi_y+1] == TAIL:
                         col = np.transpose(board)
                         next_move = self.check_column(col[hi_y], hi_x, tail)
                 elif head_dir == "↑":

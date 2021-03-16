@@ -32,6 +32,7 @@ class Snake:
         self.food_hit = False
         self.win_state = {}
         self.win_state_counter = 0
+        self.fancy = False
 
     def step(self, action=None):
         # self.check_snake()
@@ -288,27 +289,97 @@ class Snake:
                          (520, 20 + BOARD_COUNT * VELOCITY))
         score_str = self.font.render(f"Score: {self.score}", 1, WHITE)
         self.win.blit(score_str, (240, 540))
-        food_drawn = False
-        for i in range(BOARD_COUNT):
-            for j in range(BOARD_COUNT):
-                if board[i][j] == HEAD:
+        for i, item in enumerate(self.snake):
+            if i == 0:
+                if item[2] == "↑" or item[2] == "↓":
                     pygame.draw.rect(self.win, YELLOW,
-                                     (self.vel*j+21, self.vel*i+21,
-                                      self.shape, self.shape))
-                elif board[i][j] == TAIL:
+                                     (self.vel*item[1]+21 + SHAPE//2 -
+                                         VER_SHAPE[0]//2,
+                                         self.vel*item[0]+21 + SHAPE//2 -
+                                         VER_SHAPE[1]//2,
+                                      VER_SHAPE[0], VER_SHAPE[1]))
+                elif item[2] == "→" or item[2] == "←":
+                    pygame.draw.rect(self.win, YELLOW,
+                                     (self.vel*item[1]+21 + SHAPE//2 -
+                                      HOR_SHAPE[0]//2, self.vel*item[0]+21 +
+                                      SHAPE//2 - HOR_SHAPE[1]//2,
+                                      HOR_SHAPE[0], HOR_SHAPE[1]))
+            else:
+                if item[2] == "↑" or item[2] == "↓":
                     pygame.draw.rect(self.win, RED,
-                                     (self.vel*j+21, self.vel*i+21,
-                                      self.shape, self.shape))
-                elif board[i][j] == FOOD:
-                    food_drawn = True
-                    pygame.draw.rect(self.win, GREEN,
-                                     (self.vel*j+21, self.vel*i+21,
-                                      self.shape, self.shape))
-        # self.draw_win()
+                                     (self.vel*item[1]+21 + SHAPE//2 -
+                                      VER_SHAPE[0]//2, self.vel*item[0]+21 +
+                                      SHAPE//2 - VER_SHAPE[1]//2,
+                                      VER_SHAPE[0], VER_SHAPE[1]))
+                elif item[2] == "→" or item[2] == "←":
+                    pygame.draw.rect(self.win, RED,
+                                     (self.vel*item[1]+21 + SHAPE//2 -
+                                      HOR_SHAPE[0]//2, self.vel*item[0]+21 +
+                                      SHAPE//2 - HOR_SHAPE[1]//2,
+                                      HOR_SHAPE[0], HOR_SHAPE[1]))
+        pygame.draw.rect(self.win, GREEN,
+                         (self.vel*self.food_y+21, self.vel*self.food_x+21,
+                          self.shape, self.shape))
+        if self.fancy:
+            self.draw_nodes()
         pygame.display.flip()
         self.clock.tick(self.fps)
-        if not food_drawn:
-            print('[WARNING FOOD NOT FOUND]', self.food_hit)
+
+    def draw_nodes(self):
+        x = self.snake[0][0]
+        y = self.snake[0][1]
+        f_x = self.food_x
+        f_y = self.food_y
+        dirr = self.snake[0][2]
+        if dirr == "↑":
+            pygame.draw.rect(self.win, BLUE,
+                             (self.vel*y+21, self.vel*(x-1)+21,
+                              self.shape, self.shape))
+            pygame.draw.rect(self.win, BLUE,
+                             (self.vel*(y-1)+21, self.vel*x+21,
+                              self.shape, self.shape))
+            pygame.draw.rect(self.win, BLUE,
+                             (self.vel*(y+1)+21, self.vel*x+21,
+                              self.shape, self.shape))
+        elif dirr == "→":
+            pygame.draw.rect(self.win, BLUE,
+                             (self.vel*y+21, self.vel*(x-1)+21,
+                              self.shape, self.shape))
+            pygame.draw.rect(self.win, BLUE,
+                             (self.vel*y+21, self.vel*(x+1)+21,
+                              self.shape, self.shape))
+            pygame.draw.rect(self.win, BLUE,
+                             (self.vel*(y+1)+21, self.vel*x+21,
+                              self.shape, self.shape))
+        elif dirr == "↓":
+            pygame.draw.rect(self.win, BLUE,
+                             (self.vel*(y-1)+21, self.vel*x+21,
+                              self.shape, self.shape))
+            pygame.draw.rect(self.win, BLUE,
+                             (self.vel*y+21, self.vel*(x+1)+21,
+                              self.shape, self.shape))
+            pygame.draw.rect(self.win, BLUE,
+                             (self.vel*(y+1)+21, self.vel*x+21,
+                              self.shape, self.shape))
+        elif dirr == "←":
+            pygame.draw.rect(self.win, BLUE,
+                             (self.vel*(y-1)+21, self.vel*x+21,
+                              self.shape, self.shape))
+            pygame.draw.rect(self.win, BLUE,
+                             (self.vel*y+21, self.vel*(x-1)+21,
+                              self.shape, self.shape))
+            pygame.draw.rect(self.win, BLUE,
+                             (self.vel*y+21, self.vel*(x+1)+21,
+                              self.shape, self.shape))
+        pygame.draw.line(self.win, (255, 0, 255),
+                         (y*self.vel+21 + SHAPE//2, x*self.vel+21 + SHAPE//2),
+                         (f_y*self.vel+21 + SHAPE//2,
+                          x*self.vel+21 + SHAPE//2), 5)
+        pygame.draw.line(self.win, (0, 0, 255),
+                         (f_y*self.vel+21 + SHAPE//2,
+                          x*self.vel+21 + SHAPE//2),
+                         (f_y*self.vel+21 + SHAPE//2,
+                          f_x*self.vel+21 + SHAPE//2), 5)
 
     def draw_win(self):
         win_x = self.snake[0][0] - WINDOW_SIZE//2
@@ -343,6 +414,11 @@ class Snake:
                     self.fps += 1
                 elif event.key == pygame.K_DOWN:
                     self.fps -= 1
+                elif event.key == pygame.K_c:
+                    if not self.fancy:
+                        self.fancy = True
+                    elif self.fancy:
+                        self.fancy = False
     """
     def create_food(self):
         while True:

@@ -5,7 +5,7 @@ from utils import *
 class ValueFunction:
 
     def __init__(self, update_rate):
-        self.gamma = 1
+        self.gamma = 0.9
         self.update_rate = update_rate
 
     def reset(self, board):

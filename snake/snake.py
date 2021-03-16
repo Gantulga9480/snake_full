@@ -56,14 +56,7 @@ class Snake:
         return dis
 
     def get_action_dir(self, action):
-        if action == 0:
-            self.snake[0][2] = "↑"
-        elif action == 1:
-            self.snake[0][2] = "→"
-        elif action == 2:
-            self.snake[0][2] = "↓"
-        elif action == 3:
-            self.snake[0][2] = "←"
+        self.snake[0][2] = action
 
     def get_possible_actions(self):
         if self.snake[0][2] == "↑":

@@ -11,37 +11,41 @@ from matplotlib import pyplot as plt
 from datetime import datetime as dt
 import argparse
 import os
+# from tkinter import Tk, filedialog
+# tk_root = Tk()
+# tk_root.withdraw()
+# dir_name = filedialog.askopenfilename()
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-i', '--index', default='')
 args = parser.parse_args()
 
 # Hyperparameters
-LEARNING_RATE = 0.001
-DISCOUNT_RATE = 0.9
+LEARNING_RATE = .001
+DISCOUNT_RATE = .9
 EPSILON = 1
 EPSILON_DECAY = .99999
-MIN_EPSILON = 0.01
+MIN_EPSILON = .01
 BATCH_SIZE = 256
-EPOCH = 10
+EPOCH = 5
 TARGET_NET_UPDATE_FREQUENCY = 5
 UPDATE_COUNTER = 1
 MAX_SCORE = 5
 
-BUFFER_SIZE = 10000
-MIN_BUFFER_SIZE = 1000
+BUFFER_SIZE = 20000
+MIN_BUFFER_SIZE = 5000
 REPLAY_BUFFER = deque(maxlen=BUFFER_SIZE)
 SAMPLES = []
 
-INPUT_SHAPE = WINDOW_SIZE * WINDOW_SIZE + 2
-HIDDEN_LAYER_1 = 25
-HIDDEN_LAYER_2 = 8
+INPUT_SHAPE = WINDOW_SIZE * WINDOW_SIZE
+HIDDEN_LAYER_1 = INPUT_SHAPE * 4
+HIDDEN_LAYER_2 = HIDDEN_LAYER_1 // 2
 OUT_SHAPE = len(ACTION_SPACE)
-NETWORK = [INPUT_SHAPE, HIDDEN_LAYER_1, OUT_SHAPE]
+NETWORK = [INPUT_SHAPE, HIDDEN_LAYER_1, HIDDEN_LAYER_2, OUT_SHAPE]
 
 # Mixed precision : RTX GPU only
-policy = mixed_precision.Policy('mixed_float16')
-mixed_precision.set_global_policy(policy)
+# policy = mixed_precision.Policy('mixed_float16')
+# mixed_precision.set_global_policy(policy)
 
 # CPU only
 # os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
@@ -90,7 +94,8 @@ def get_model():
     model = Sequential()
     model.add(Input(shape=(INPUT_SHAPE,), name='input'))
     model.add(Dense(HIDDEN_LAYER_1, activation='relu'))
-    # model.add(Dense(HIDDEN_LAYER_2, activation='relu'))
+    model.add(Dropout(0.3))
+    model.add(Dense(HIDDEN_LAYER_2, activation='relu'))
     model.add(Dense(len(ACTION_SPACE)))
     # model.add(Activation('relu', dtype='float32'))  # TC enabled GPU only
     model.compile(loss="mse", optimizer=Adam(lr=LEARNING_RATE),
@@ -123,7 +128,7 @@ def keras_train():
         X.append(state)
         Y.append(current_qs)
     main_nn.fit(np.array(X), np.array(Y), epochs=EPOCH,
-                batch_size=BATCH_SIZE, shuffle=False, verbose=0)
+                batch_size=BATCH_SIZE, shuffle=False, verbose=1)
 
 
 # Load model
@@ -150,7 +155,11 @@ while game.run:
             action_values = main_nn.predict(np.expand_dims(state, axis=0))[0]
             action = np.argmax(action_values)
         terminal, new_state, r = game.step(action=action)
-        REPLAY_BUFFER.append([state, action, new_state, r, terminal])
+        if r == FOOD_REWARD:
+            score += 1
+            REPLAY_BUFFER.append([state, action, new_state, r, True])
+        else:
+            REPLAY_BUFFER.append([state, action, new_state, r, terminal])
         EPSILON = EPSILON * EPSILON_DECAY
         ep_reward += r
         state = new_state
@@ -162,15 +171,11 @@ while game.run:
         if UPDATE_COUNTER % TARGET_NET_UPDATE_FREQUENCY == 0:
             target_nn.set_weights(main_nn.get_weights())
             UPDATE_COUNTER = 1
-
         if EPSILON < MIN_EPSILON:
             EPSILON = 0.1
             info = f"{args.index}_sc{MAX_SCORE}_ep{episode}_t{dtime[0]}.h5"
             main_nn.save(info)
             ep_index += 1
-
-        if r == FOOD_REWARD:
-            score += 1
 
     ep_rewards.append(ep_reward)
     episode += 1
@@ -187,9 +192,6 @@ while game.run:
         dtime = str(time_now - start_time).split(':')
         if int(dtime[0]) == hour:
             hour += 1
-            scr = model_test()
-            if scr >= 100:
-                model_test(loop=True)
         avg_r = sum(ep_rewards) / show_every
         ep_rewards.clear()
         if avg_r > reward_tmp:
@@ -199,7 +201,7 @@ while game.run:
         desc += f'{dtime[0]}:{dtime[1]}'
         reward_tmp = avg_r
         history['reward'].append(avg_r)
-        history['ep'].append(EPSILON*1000)
+        history['ep'].append(EPSILON*10)
         game.caption(desc)
 
 time_now = dt.now()
@@ -216,10 +218,11 @@ with open(f'{args.index}.txt', 'w+') as f:
     f.write(f'food reward: {FOOD_REWARD}\n')
     f.write(f'out reward: {OUT_REWARD}\n')
     f.write(f'state: {TAIL}, {HEAD}, {FOOD}\n')
+    f.write(f'win size: {WINDOW_SIZE}\n')
     f.write(f'Network:\n')
     for item in NETWORK:
         f.write(f':  {item}\n')
 plt.plot(history['reward'])
-plt.plot(history['ep'])
+# plt.plot(history['ep'])
 plt.ylim([OUT_REWARD*1.3, FOOD*50])
 plt.show()

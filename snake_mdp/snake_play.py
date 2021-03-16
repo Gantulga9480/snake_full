@@ -12,12 +12,12 @@ args = parser.parse_args()
 sg.init(args.description)
 game = sg.Snake(colorful=args.colorful, num=args.show_val,
                 update_rate=args.update_rate)
-scores = []
+score = 0
 for episode in range(100):
     state = game.reset()
     while not game.over:
         action = game.v.getAction(state)
         _, state, _ = game.step(action=action)
-    scores.append(len(game.snake) - 3)
-    # game.caption(f'{len(scores)} : {sum(scores)/len(scores)}')
-print(sum(scores)/len(scores))
+    score += len(game.snake) - 3
+    # game.caption(f'{episode} : {score/(episode + 1)}')
+print(score/100)

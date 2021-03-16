@@ -1,24 +1,29 @@
 from snake_game import *
 from matplotlib import pyplot as plt
 import numpy as np
-import time
 import json
 import argparse
-parser = argparse.ArgumentParser()
-parser.add_argument('-i', '--index', default='')
-args = parser.parse_args()
+# parser = argparse.ArgumentParser()
+# parser.add_argument('-i', '--index', default='')
+# args = parser.parse_args()
+
+from tkinter import Tk, filedialog
+tk_root = Tk()
+tk_root.withdraw()
+dir_name = filedialog.askopenfilename()
+data_file = open(dir_name, 'r')
+q_table = json.load(data_file)
 
 
-LR = 0.001
-GAMMA = 0.999
+LR = 0.1
+GAMMA = 0.9
 EPSILON = 1
 EPSILON_MIN = 0.01
 EPSILON_DECAY = 0.999999
 MAX_REWARD = 4000
 
-q_table = {}
+# q_table = {}
 
-# time.sleep(1)
 game = Game()
 show_every = 100
 ep_rewards = []
@@ -91,9 +96,9 @@ while game.run:
         game.caption(desc)
         if avg_r >= MAX_REWARD:
             MAX_REWARD = avg_r
-            with open(f'data{args.index}_{avg_r}.json', 'w') as fp:
+            with open(f'data{8}_{avg_r}.json', 'w') as fp:
                 json.dump(q_table, fp)
-with open(f'q{args.index}.json', 'w') as fp:
+with open(f'q{8}.json', 'w') as fp:
     json.dump(q_table, fp)
 plt.plot(history['ep'], history['reward'])
 plt.xlabel(f'Number of {show_every} episodes)')

@@ -1,0 +1,50 @@
+lr: 0.001
+gamma: 0.9
+batch size: 256
+buffer size: 10000
+food reward: 10
+out reward: -5
+Network:
+:  51
+:  4
+--------------------------
+HOUR 1
+test reward: 0
+test score: 0
+--------------------------
+HOUR 2
+test reward: 0
+test score: 0
+--------------------------
+HOUR 3
+test reward: 0
+test score: 0
+--------------------------
+HOUR 4
+test reward: 0
+test score: 0
+--------------------------
+HOUR 5
+test reward: 0
+test score: 0
+--------------------------
+HOUR 6
+test reward: 10
+test score: 1
+--------------------------
+HOUR 7
+test reward: 0
+test score: 0
+--------------------------
+HOUR 8
+test reward: 0
+test score: 0
+--------------------------
+HOUR 9
+test reward: 0
+test score: 0
+--------------------------
+HOUR 10
+test reward: 0
+test score: 0
+--------------------------

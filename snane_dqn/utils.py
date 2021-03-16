@@ -7,7 +7,7 @@ YELLOW = (255, 255, 0)
 
 WIDTH = 540
 HEIGHT = 600
-VELOCITY = 50
+VELOCITY = 25
 SHAPE = VELOCITY - 1
 BOARD_COUNT = int((WIDTH - 40) / VELOCITY)
 TEST_VEL = 25
@@ -22,15 +22,17 @@ FPS = 60
 EMPTY = 0
 TAIL = -1
 HEAD = 1
-FOOD = 3
+FOOD = 5
+
+TAIL_LEN = 0
 
 # 0: left, 1: forward, 2: right
 ACTION_SPACE = [0, 1, 2]
-FOOD_REWARD = 5
-OUT_REWARD = -5
+FOOD_REWARD = 40
+OUT_REWARD = -20
 EMPTY_STEP_REWARD = 0
 
-WINDOW_SIZE = 7
+WINDOW_SIZE = 11
 
 
 def pad_with(vector, pad_width, _, kwargs):

@@ -36,6 +36,7 @@ class Snake:
         self.out = False
         self.over = False
         self.food_hit = False
+        self.facny = False
 
     def step(self, action=None):
         if self.game_flip:
@@ -63,39 +64,36 @@ class Snake:
     def get_state(self):
         return self.get_window()
 
-    def reward_func(self):
-        return EMPTY_STEP_REWARD
-
     def get_window(self):
         if self.snake[0][2] == "↑":
             f_x = self.food_x
             f_y = self.food_y
             h_x = self.snake[0][0]
             h_y = self.snake[0][1]
+            t_x = self.snake[-1][0]
+            t_y = self.snake[-1][1]
             t_board = self.board.copy()
         elif self.snake[0][2] == "→":
             t_board = np.rot90(self.board)
-            f_x, f_y, h_x, h_y = self.rotate_food(1)
+            f_x, f_y, h_x, h_y, t_x, t_y = self.rotate_food(1)
         elif self.snake[0][2] == "↓":
             t_board = np.rot90(self.board, 2)
-            f_x, f_y, h_x, h_y = self.rotate_food(2)
+            f_x, f_y, h_x, h_y, t_x, t_y = self.rotate_food(2)
         elif self.snake[0][2] == "←":
             t_board = np.rot90(self.board, 3)
-            f_x, f_y, h_x, h_y = self.rotate_food(3)
-        # print(t_board)
-        # print(f_x, f_y)
-        # print(h_x, h_y)
+            f_x, f_y, h_x, h_y, t_x, t_y = self.rotate_food(3)
         win_x = h_x
         win_y = h_y
         end_x = win_x + WINDOW_SIZE
         end_y = win_y + WINDOW_SIZE
         board = np.pad(t_board, WINDOW_SIZE//2)
         board = board[win_x:end_x, win_y:end_y]
-        # print(board)
         board = board.flatten()
-        state = np.array([f_x - h_x, f_y - h_y])
+        state = np.array([f_x, f_y, h_x, h_y, t_x, t_y, self.score + 2])
+        # state = np.array([f_x - h_x, f_y - h_y, t_x, t_y, self.score + 2])
+        # states = board
         states = np.concatenate((state, board), axis=0)
-        assert states.shape[0] == 51
+        # assert states.shape[0] == WINDOW_SIZE * WINDOW_SIZE + 7
         return states
 
     def get_action_dir(self, action):
@@ -140,42 +138,24 @@ class Snake:
         d = np.random.randint(1, 5)
         if d == 1:
             ldir = "↓"
-            x = np.random.randint(2, self.board_count - 1)
-            x_1 = x - 1
-            x_2 = x_1 - 1
+            x = np.random.randint(TAIL_LEN, self.board_count - 1)
             y = np.random.randint(0, self.board_count - 1)
-            y_1 = y
-            y_2 = y_1
         elif d == 2:
             ldir = "→"
-            y = np.random.randint(2, self.board_count - 1)
-            y_1 = y - 1
-            y_2 = y_1 - 1
+            y = np.random.randint(TAIL_LEN, self.board_count - 1)
             x = np.random.randint(0, self.board_count - 1)
-            x_1 = x
-            x_2 = x_1
         elif d == 3:
             ldir = "↑"
-            x = np.random.randint(0, self.board_count - 3)
-            x_1 = x + 1
-            x_2 = x_1 + 1
+            x = np.random.randint(0, self.board_count - 1 - TAIL_LEN)
             y = np.random.randint(0, self.board_count - 1)
-            y_1 = y
-            y_2 = y_1
         elif d == 4:
             ldir = "←"
             x = np.random.randint(0, self.board_count - 1)
-            x_1 = x
-            x_2 = x_1
-            y = np.random.randint(0, self.board_count - 3)
-            y_1 = y + 1
-            y_2 = y_1 + 1
+            y = np.random.randint(0, self.board_count - 1 - TAIL_LEN)
         self.board[x][y] = HEAD
-        self.board[x_1][y_1] = TAIL
-        self.board[x_2][y_2] = TAIL
         self.snake.append([x, y, ldir])
-        self.snake.append([x_1, y_1, ldir])
-        self.snake.append([x_2, y_2, ldir])
+        for _ in range(TAIL_LEN):
+            self.add_tail()
         self.create_food()
         return self.get_state()
 
@@ -250,11 +230,14 @@ class Snake:
         pygame.draw.rect(self.win, GREEN,
                          (self.vel*self.food_y+21, self.vel*self.food_x+21,
                           self.shape, self.shape))
-        self.draw_win()
+        if self.facny:
+            self.draw_win()
         pygame.display.flip()
         self.clock.tick(self.fps)
 
     def draw_win(self):
+        f_x = self.food_x
+        f_y = self.food_y
         win_x = self.snake[0][0] - WINDOW_SIZE//2
         win_y = self.snake[0][1] - WINDOW_SIZE//2
         end_x = win_x + WINDOW_SIZE
@@ -271,6 +254,16 @@ class Snake:
         pygame.draw.line(self.win, WHITE,
                          (win_y*self.vel+21, end_x*self.vel+21),
                          (end_y*self.vel+21, end_x*self.vel+21))
+        pygame.draw.line(self.win, (255, 0, 255),
+                         (self.snake[0][1]*self.vel+19 + SHAPE//2,
+                          self.snake[0][0]*self.vel+19 + SHAPE//2),
+                         (f_y*self.vel+21 + SHAPE//2,
+                          self.snake[0][0]*self.vel+19 + SHAPE//2), 5)
+        pygame.draw.line(self.win, (0, 0, 255),
+                         (f_y*self.vel+19 + SHAPE//2,
+                          self.snake[0][0]*self.vel+19 + SHAPE//2),
+                         (f_y*self.vel+19 + SHAPE//2,
+                          f_x*self.vel+19 + SHAPE//2), 5)
 
     def handle_event(self):
         for event in pygame.event.get():
@@ -289,6 +282,11 @@ class Snake:
                     self.fps += 1
                 elif event.key == pygame.K_DOWN:
                     self.fps -= 1
+                elif event.key == pygame.K_c:
+                    if not self.facny:
+                        self.facny = True
+                    elif self.facny:
+                        self.facny = False
 
     def create_food(self):
         while True:
@@ -341,16 +339,22 @@ class Snake:
         f_y = self.food_y
         h_x = self.snake[0][0]
         h_y = self.snake[0][1]
+        t_x = self.snake[-1][0]
+        t_y = self.snake[-1][1]
         for _ in range(count):
             ft_y = f_x
             ht_y = h_x
+            tt_y = t_x
             ft_x = self.board_count - 1 - f_y
             ht_x = self.board_count - 1 - h_y
+            tt_x = self.board_count - 1 - t_y
             f_x = ft_x
             f_y = ft_y
             h_x = ht_x
             h_y = ht_y
-        return f_x, f_y, h_x, h_y
+            t_x = tt_x
+            t_y = tt_y
+        return f_x, f_y, h_x, h_y, t_x, t_y
 
     @staticmethod
     def caption(msg):

@@ -1,0 +1,11 @@
+lr: 0.001
+gamma: 0.9
+batch size: 256
+buffer size: 10000
+food reward: 5
+out reward: -5
+state: -1, 1, 0
+Network:
+:  123
+:  246
+:  3
